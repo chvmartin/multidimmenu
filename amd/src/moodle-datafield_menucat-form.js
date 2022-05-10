@@ -25,7 +25,7 @@ define(['jquery', 'core/ajax'],
 
                 Ajax.call([{
                     methodname: 'datafield_menucat_get_level2',
-                    args: {level1: this.value,contentid: this.contentid},
+                    args: {level1: this.value,contentid: contentid},
                     done: function (resp, err) {
                         courses.empty()
                         s[0] = new Option('Any',0);

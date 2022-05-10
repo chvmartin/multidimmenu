@@ -33,7 +33,7 @@ class data_field_menucat extends data_field_base {
     protected static $priority = self::HIGH_PRIORITY;
 
     function display_add_field($recordid = 0, $formdata = null) {
-        global $DB, $OUTPUT,$PAGE;
+        global $DB, $OUTPUT,$PAGE,$CFG;
 
 		//nacita data ak je vytvoreny zaznam pre datafield z databazi
         if ($formdata) {
@@ -46,8 +46,7 @@ class data_field_menucat extends data_field_base {
             $content = '';
         }
 
-		$PAGE->requires->js_call_amd('datafield_menucat/', 'init');
-
+        $PAGE->requires->js_call_amd('datafield_menucat/moodle-datafield_menucat-form', 'init');
 
 	    $str = '<div title="' . s($this->field->description) . '">';
 	    $str .= '<label for="' . 'field_' . $this->field->id . '">';
@@ -58,72 +57,23 @@ class data_field_menucat extends data_field_base {
 	    }
 	    $str .= '</label>';
 
-
-		$catcounter1=1;
-	    $catcounter2=1;
-	    $catcounter3=1;
-	    $menucontect1 = '';
-	    $menucontect2 = '';
-	    $menucontect3 = '';
 	    $menulevel1=[];
 
 	    $convert_content = new custom_menu($this->field->param1, current_language());
-		//print_object($convert_content->get_children());die;
-		//lvl 1 foreach
+
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
-
-			//lvl 2 foreach
-		    if ($menulvl1->has_children()) {
-			    foreach ($menulvl1->get_children()  as $key2 => $menulvl2) {
-
-
-					//lvl 3 foreach
-				    if ($menulvl2->has_children()) {
-					    foreach ($menulvl2->get_children() as $key3 => $menulvl3) {
-						    $menucontect3 .= html_writer::tag('option',$menulvl3->get_text(),array('value' => $menulvl3->get_text(), 'class' => 'catlvl3_'.$catcounter3));
-						    $catcounter3++;
-
-					    }
-					    $str3 .= html_writer::tag('select',$menucontect3,array( 'class' => 'catlvl2-'.$catcounter2, 'name'=>'lvl3_'.$menulvl2->get_text()));
-					    $menucontect3='';
-				    }// endo of lvl 3 foreach
-
-
-
-					$menucontect2 .= html_writer::tag('option',$menulvl2->get_text(),array('value' => $menulvl2->get_text(), 'class' => 'catlvl2-'.$catcounter2));
-				    $catcounter2++;
-			    }
-			    $str2 .= html_writer::tag('select',$menucontect2,array('id' => 'field2_'.$key.'_'.$key2, 'class' => 'catlvl1-'.$catcounter1, 'name'=>'lvl2_'.$menulvl1->get_text() ));
-			    $menucontect2 = '';
-		    } // endo of lvl 2 foreach
 		    $menulevel1[].=$menulvl1->get_text();
-          $menucontect1 .= html_writer::tag('option',$menulvl1->get_text(),array('value' => $menulvl1->get_text(), 'class' => 'catlvl1-'.$catcounter1));
-		    $catcounter1++;
-
-
-	    } // endo of lvl 1 foreach
+	    }
 
 	    $autocomplete1 = new MoodleQuickForm_autocomplete('level1', 'autocomplete lvl 1', $menulevel1, array('width' => '95%','contentid'=>$this->field->id));
 	    $autocomplete2 = new MoodleQuickForm_autocomplete('level2', 'autocomplete lvl 2', [], array('width' => '95%'));
 	    $autocomplete3 = new MoodleQuickForm_autocomplete('level3', 'autocomplete lvl 3', [], array('width' => '95%'));
 
-	    $str1 = html_writer::tag('select',$menucontect1,array('id' => 'category', 'class' => 'select mod-data-input custom-select', 'name'=>'field_'.$this->field->id ));
-
-	    $str .= $str1.$str2.$str3;
-	    /*$str .= html_writer::script("document.getElementById('category').addEventListener('change', () => {
-  
-  let selected = document.querySelector('#category>option:checked');
-  let active = document.getElementsByClassName('active')
-  for (let i = 0; i < active.length; i++) active[0].classList.remove(\"active\");
-  document.getElementsByClassName(selected.className)[1].classList.add(\"active\");
-})");*/
 	    $str .= "<div>" . $autocomplete1->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete2->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete3->toHtml() . "</div>";
 	    $str .= '</div>';
 
-
-		//echo($str);
         return $str;
     }
 

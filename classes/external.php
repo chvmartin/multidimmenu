@@ -63,7 +63,7 @@ class external extends external_api
         );
 	    $contentId = new \external_value(
 		    PARAM_INT,
-		    'The menu level 1 parameter',
+		    'The field id',
 		    VALUE_REQUIRED
 	    );
 
@@ -85,12 +85,12 @@ class external extends external_api
 		    )
 	    );
 
-        global $CFG, $DB;
+        global $DB;
 	    $menulevel2=[];
 	    $content = $DB->get_field('data_content', 'content', array('id'=>$params->contentid));
 	    $convert_content = new \custom_menu($content, current_language());
 		foreach ($convert_content->get_children() as $key => $menulvl1){
-			if($menulvl1->get_text() == $params->$level1){
+			if($menulvl1->get_text() == $params->level1){
 				foreach ($menulvl1->get_children() as $menulvl2){
 					$menulevel2[].=$menulvl2->get_text();
 				}
