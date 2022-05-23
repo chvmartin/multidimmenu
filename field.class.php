@@ -46,6 +46,30 @@ class data_field_menucat extends data_field_base {
             $content = '';
         }
 
+	    $menuthirdlevel=[];
+	    $content = $DB->get_field('data_fields', 'param1', array('id'=>49));
+	    $convert_content = new \custom_menu($content, current_language());
+	    $i = 1;
+	    foreach ($convert_content->get_children() as $key => $menufirstlevel){
+		    if($menufirstlevel->get_text() == 'Non-intrusive inspection'){
+			    foreach ($menufirstlevel->get_children() as $key2 => $childsecondlevel){
+				    if($key2 == 2-1){
+					    foreach ($childsecondlevel->get_children() as $child){
+
+						    $childprop = new \stdClass();
+						    $childprop->id = $i;
+						    $childprop->thirdlevelitem = $child->get_text();
+						    $menuthirdlevel[$i]=$childprop;
+						    $i++;
+					    }
+
+				    }
+
+			    }
+		    }
+	    }
+	    print_object($menuthirdlevel);
+
         $PAGE->requires->js_call_amd('datafield_menucat/moodle-datafield_menucat-form', 'init');
 
 	    $str = '<div title="' . s($this->field->description) . '">';
@@ -60,14 +84,13 @@ class data_field_menucat extends data_field_base {
 	    $menulevel1=[];
 
 	    $convert_content = new custom_menu($this->field->param1, current_language());
-
+	    $menulevel1[].='Any';
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
 		    $menulevel1[].=$menulvl1->get_text();
-	    }
-
-	    $autocomplete1 = new MoodleQuickForm_autocomplete('level1', 'autocomplete lvl 1', $menulevel1, array('width' => '95%','contentid'=>$this->field->id));
-	    $autocomplete2 = new MoodleQuickForm_autocomplete('level2', 'autocomplete lvl 2', [], array('width' => '95%'));
-	    $autocomplete3 = new MoodleQuickForm_autocomplete('level3', 'autocomplete lvl 3', [], array('width' => '95%'));
+	    } 
+	    $autocomplete1 = new MoodleQuickForm_autocomplete('first_level', 'autocomplete lvl 1', $menulevel1, array('contentid'=>$this->field->id));
+	    $autocomplete2 = new MoodleQuickForm_autocomplete('second_level', 'autocomplete lvl 2', [], array('contentid'=>$this->field->id));
+	    $autocomplete3 = new MoodleQuickForm_autocomplete('third_level', 'autocomplete lvl 3', [], array('contentid'=>$this->field->id));
 
 	    $str .= "<div>" . $autocomplete1->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete2->toHtml() . "</div>";
@@ -147,7 +170,7 @@ class data_field_menucat extends data_field_base {
     }
 
     /**
-     * Return the plugin configs for external functions.
+     * Return the plugin configs for externallib functions.
      *
      * @return array the list of config parameters
      * @since Moodle 3.3

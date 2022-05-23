@@ -14,101 +14,136 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-use data_field_base;
 /**
- * The Global User Report external api functions.
+ * The Global User Report externallib api functions.
  *
- * @package     report_gur
+ * @package    datafield_menucat;
  * @category    admin
  * @copyright   2022 Lukas Celinak, Edumood,  <lukascelinak@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace report_gur;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/externallib.php");
-require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/dataprivacy/lib.php');
 
-use coding_exception;
-use context_helper;
-use context_system;
-use context_user;
-use core\invalid_persistent_exception;
-use core_user;
-use dml_exception;
-use external_api;
-use external_description;
-use external_function_parameters;
-use external_multiple_structure;
-use external_single_structure;
-use external_value;
-use external_warnings;
-use invalid_parameter_exception;
-use moodle_exception;
-use required_capability_exception;
-use restricted_context_exception;
-use tool_dataprivacy\external\category_exporter;
-use tool_dataprivacy\external\data_request_exporter;
-use tool_dataprivacy\external\purpose_exporter;
-use tool_dataprivacy\output\data_registry_page;
 
-class external extends external_api
+class datafield_menucat_external extends external_api
 {
-    public static function get_menu_parameters() {
-        $menuParamater = new \external_value(
-            PARAM_TEXT,
-            'The menu level 1 parameter',
-            VALUE_REQUIRED
-        );
-	    $contentId = new \external_value(
-		    PARAM_INT,
-		    'The field id',
-		    VALUE_REQUIRED
-	    );
+    public static function get_second_level_parameters() {
+        $firstlevel = new \external_value(PARAM_INT, 'The menu level 1 parameter',);
+	    $contentid = new \external_value(  PARAM_INT,'The field id', VALUE_REQUIRED);
 
         $params = array(
-            'level1' => $menuParamater,
-	        'contentid'=>$contentId,
+            'firstlevel' => $firstlevel,
+	        'contentid'=>$contentid,
         );
         return new external_function_parameters($params);
     }
 
-    public static function get_level2($level1,$contentid) {
+    public static function get_second_level($firstlevel,$contentid) {
 	    global $PAGE;
 
 	    $params = self::validate_parameters(
-		    self::get_menu_parameters(),
+		    self::get_second_level_parameters(),
 		    array(
-			    'level1' => $level1,
+			    'firstlevel' => $firstlevel,
 			    'contentid'=>$contentid,
 		    )
 	    );
 
         global $DB;
-	    $menulevel2=[];
-	    $content = $DB->get_field('data_content', 'content', array('id'=>$params->contentid));
+	    $menusecondlevel=[];
+	    $content = $DB->get_field('data_fields', 'param1', array('id'=>$params['contentid']));
 	    $convert_content = new \custom_menu($content, current_language());
-		foreach ($convert_content->get_children() as $key => $menulvl1){
-			if($menulvl1->get_text() == $params->level1){
-				foreach ($menulvl1->get_children() as $menulvl2){
-					$menulevel2[].=$menulvl2->get_text();
+		$i = 1;
+		foreach ($convert_content->get_children() as $key => $menufirstlevel){
+			if($key == $params['firstlevel']-1){
+				foreach ($menufirstlevel->get_children() as $child){
+					$childprop = new \stdClass();
+					$childprop->id = $i;
+					$childprop->secondlevelitem = $child->get_text();
+					$menusecondlevel[$i]=$childprop;
+					$i++;
 				}
 			}
 		}
+       return $menusecondlevel;
 
 
-        return $menulevel2;
     }
 
-    public static function get_courses_returns() {
+    public static function get_second_level_returns() {
         return new external_multiple_structure(
             new external_single_structure([
                 'id'    => new external_value(PARAM_INT, 'ID of the course'),
-                'fullname'  => new external_value(PARAM_NOTAGS, 'The course name')
+                'secondlevelitem'  => new external_value(PARAM_TEXT, 'The course name')
             ])
         );
     }
+
+	public static function get_third_level_parameters() {
+		$firstlevel = new \external_value(PARAM_TEXT, 'The menu level 1 parameter',);
+		$secondlevel = new \external_value(PARAM_INT, 'The menu level 2 parameter',);
+		$contentid = new \external_value(  PARAM_INT,'The field id', VALUE_REQUIRED);
+
+		$params = array(
+			'firstlevel' => $firstlevel,
+			'secondlevel' => $secondlevel,
+			'contentid'=>$contentid,
+		);
+		return new external_function_parameters($params);
+	}
+
+	public static function get_third_level($firstlevel,$secondlevel,$contentid) {
+		global $PAGE;
+
+		$params = self::validate_parameters(
+			self::get_second_level_parameters(),
+			array(
+				'firstlevel' => $firstlevel,
+				'secondlevel' => $secondlevel,
+				'contentid'=>$contentid,
+			)
+		);
+
+		global $DB;
+		$menuthirdlevel=[];
+		$content = $DB->get_field('data_fields', 'param1', array('id'=>$params['contentid']));
+		$convert_content = new \custom_menu($content, current_language());
+		$i = 1;
+		$params['firstlevel']=trim($params['firstlevel']);
+		foreach ($convert_content->get_children() as $key => $menufirstlevel){
+			if($menufirstlevel->get_text() == 'Non-intrusive inspection'){
+				foreach ($menufirstlevel->get_children() as $key2 => $childsecondlevel){
+					if($key2 == $params['secondlevel']-1){
+						foreach ($childsecondlevel->get_children() as $child){
+
+								$childprop = new \stdClass();
+								$childprop->id = $i;
+								$childprop->thirdlevelitem = $child->get_text();
+								$menuthirdlevel[$i]=$childprop;
+								$i++;
+						}
+
+					}
+
+				}
+			}
+		}
+		return $menuthirdlevel;
+
+
+	}
+
+	public static function get_third_level_returns() {
+		return new external_multiple_structure(
+			new external_single_structure([
+				'id'    => new external_value(PARAM_INT, 'ID of the course'),
+				'thirdlevelitem'  => new external_value(PARAM_TEXT, 'The course name')
+			])
+		);
+	}
 
 
 
