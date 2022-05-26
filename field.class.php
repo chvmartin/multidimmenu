@@ -35,7 +35,6 @@ class data_field_menucat extends data_field_base {
     function display_add_field($recordid = 0, $formdata = null) {
         global $DB, $OUTPUT,$PAGE,$CFG;
 
-		//nacita data ak je vytvoreny zaznam pre datafield z databazi
         if ($formdata) {
             $fieldname = 'field_' . $this->  field->id;
             $content = $formdata->$fieldname;
@@ -45,30 +44,6 @@ class data_field_menucat extends data_field_base {
         } else {
             $content = '';
         }
-
-	    $menuthirdlevel=[];
-	    $content = $DB->get_field('data_fields', 'param1', array('id'=>49));
-	    $convert_content = new \custom_menu($content, current_language());
-	    $i = 1;
-	    foreach ($convert_content->get_children() as $key => $menufirstlevel){
-		    if($menufirstlevel->get_text() == 'Non-intrusive inspection'){
-			    foreach ($menufirstlevel->get_children() as $key2 => $childsecondlevel){
-				    if($key2 == 2-1){
-					    foreach ($childsecondlevel->get_children() as $child){
-
-						    $childprop = new \stdClass();
-						    $childprop->id = $i;
-						    $childprop->thirdlevelitem = $child->get_text();
-						    $menuthirdlevel[$i]=$childprop;
-						    $i++;
-					    }
-
-				    }
-
-			    }
-		    }
-	    }
-	    print_object($menuthirdlevel);
 
         $PAGE->requires->js_call_amd('datafield_menucat/moodle-datafield_menucat-form', 'init');
 
@@ -81,18 +56,20 @@ class data_field_menucat extends data_field_base {
 	    }
 	    $str .= '</label>';
 
-	    $menulevel1=[];
+
 
 	    $convert_content = new custom_menu($this->field->param1, current_language());
-	    $menulevel1[].='Any';
+	    $menulevel1=[];
+	    $menulevel1[].='Choose...';
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
-		    $menulevel1[].=$menulvl1->get_text();
+		    $menulevel1['firstlvl_'.$menulvl1->get_text()].=$menulvl1->get_text();
 	    } 
-	    $autocomplete1 = new MoodleQuickForm_autocomplete('first_level', 'autocomplete lvl 1', $menulevel1, array('contentid'=>$this->field->id));
-	    $autocomplete2 = new MoodleQuickForm_autocomplete('second_level', 'autocomplete lvl 2', [], array('contentid'=>$this->field->id));
-	    $autocomplete3 = new MoodleQuickForm_autocomplete('third_level', 'autocomplete lvl 3', [], array('contentid'=>$this->field->id));
+	    $autocomplete1 = new MoodleQuickForm_select('id_first_level', 'autocomplete lvl 1', $menulevel1, array('id'=>'id_first_level','contentid'=>$this->field->id));
+	    $autocomplete2 = new MoodleQuickForm_select('id_second_level', 'autocomplete lvl 2', [], array('id'=>'id_second_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
+	    $autocomplete3 = new MoodleQuickForm_select('id_third_level', 'autocomplete lvl 3', [], array('id'=>'id_third_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
 
-	    $str .= "<div>" . $autocomplete1->toHtml() . "</div>";
+	    $str .= html_writer::tag('input', '', array('name'=>'field_'.$this->field->id,'disabled'=>'disabled','id' => 'field_'.$this->field->id, 'class' => 'mod-data-input custom-select','value'=>$content));
+		$str .= "<div>" . $autocomplete1->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete2->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete3->toHtml() . "</div>";
 	    $str .= '</div>';

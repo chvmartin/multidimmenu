@@ -31,7 +31,7 @@ require_once("$CFG->libdir/externallib.php");
 class datafield_menucat_external extends external_api
 {
     public static function get_second_level_parameters() {
-        $firstlevel = new \external_value(PARAM_INT, 'The menu level 1 parameter',);
+        $firstlevel = new \external_value(PARAM_TEXT, 'The menu level 1 parameter',);
 	    $contentid = new \external_value(  PARAM_INT,'The field id', VALUE_REQUIRED);
 
         $params = array(
@@ -56,15 +56,14 @@ class datafield_menucat_external extends external_api
 	    $menusecondlevel=[];
 	    $content = $DB->get_field('data_fields', 'param1', array('id'=>$params['contentid']));
 	    $convert_content = new \custom_menu($content, current_language());
-		$i = 1;
+	    $firstlvlparam = substr($params['firstlevel'],strpos($params['firstlevel'],'_')+1,strlen($params['firstlevel']));
 		foreach ($convert_content->get_children() as $key => $menufirstlevel){
-			if($key == $params['firstlevel']-1){
+			if($menufirstlevel->get_text() == $firstlvlparam){
 				foreach ($menufirstlevel->get_children() as $child){
 					$childprop = new \stdClass();
-					$childprop->id = $i;
+					$childprop->id = 'secondlvl_'.$child->get_text();
 					$childprop->secondlevelitem = $child->get_text();
-					$menusecondlevel[$i]=$childprop;
-					$i++;
+					$menusecondlevel[]=$childprop;
 				}
 			}
 		}
@@ -76,7 +75,7 @@ class datafield_menucat_external extends external_api
     public static function get_second_level_returns() {
         return new external_multiple_structure(
             new external_single_structure([
-                'id'    => new external_value(PARAM_INT, 'ID of the course'),
+                'id'    => new external_value(PARAM_TEXT, 'ID of the course'),
                 'secondlevelitem'  => new external_value(PARAM_TEXT, 'The course name')
             ])
         );
@@ -84,7 +83,7 @@ class datafield_menucat_external extends external_api
 
 	public static function get_third_level_parameters() {
 		$firstlevel = new \external_value(PARAM_TEXT, 'The menu level 1 parameter',);
-		$secondlevel = new \external_value(PARAM_INT, 'The menu level 2 parameter',);
+		$secondlevel = new \external_value(PARAM_TEXT, 'The menu level 2 parameter',);
 		$contentid = new \external_value(  PARAM_INT,'The field id', VALUE_REQUIRED);
 
 		$params = array(
@@ -99,7 +98,7 @@ class datafield_menucat_external extends external_api
 		global $PAGE;
 
 		$params = self::validate_parameters(
-			self::get_second_level_parameters(),
+			self::get_third_level_parameters(),
 			array(
 				'firstlevel' => $firstlevel,
 				'secondlevel' => $secondlevel,
@@ -111,19 +110,17 @@ class datafield_menucat_external extends external_api
 		$menuthirdlevel=[];
 		$content = $DB->get_field('data_fields', 'param1', array('id'=>$params['contentid']));
 		$convert_content = new \custom_menu($content, current_language());
-		$i = 1;
-		$params['firstlevel']=trim($params['firstlevel']);
+		$secondlvlparam = substr($params['secondlevel'],strpos($params['secondlevel'],'_')+1,strlen($params['secondlevel']));
 		foreach ($convert_content->get_children() as $key => $menufirstlevel){
-			if($menufirstlevel->get_text() == 'Non-intrusive inspection'){
+			if($menufirstlevel->get_text() == trim($params['firstlevel'])){
 				foreach ($menufirstlevel->get_children() as $key2 => $childsecondlevel){
-					if($key2 == $params['secondlevel']-1){
+					if($childsecondlevel->get_text() == $secondlvlparam){
 						foreach ($childsecondlevel->get_children() as $child){
 
 								$childprop = new \stdClass();
-								$childprop->id = $i;
+								$childprop->id = 'thirdlvl_'.$child->get_text();
 								$childprop->thirdlevelitem = $child->get_text();
-								$menuthirdlevel[$i]=$childprop;
-								$i++;
+								$menuthirdlevel[]=$childprop;
 						}
 
 					}
@@ -139,7 +136,7 @@ class datafield_menucat_external extends external_api
 	public static function get_third_level_returns() {
 		return new external_multiple_structure(
 			new external_single_structure([
-				'id'    => new external_value(PARAM_INT, 'ID of the course'),
+				'id'    => new external_value(PARAM_TEXT, 'ID of the course'),
 				'thirdlevelitem'  => new external_value(PARAM_TEXT, 'The course name')
 			])
 		);
