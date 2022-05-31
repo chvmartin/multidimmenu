@@ -63,12 +63,14 @@ class data_field_menucat extends data_field_base {
 	    $menulevel1[].='Choose...';
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
 		    $menulevel1['firstlvl_'.$menulvl1->get_text()].=$menulvl1->get_text();
-	    } 
+	    }
 	    $autocomplete1 = new MoodleQuickForm_select('id_first_level', 'autocomplete lvl 1', $menulevel1, array('id'=>'id_first_level','contentid'=>$this->field->id));
 	    $autocomplete2 = new MoodleQuickForm_select('id_second_level', 'autocomplete lvl 2', [], array('id'=>'id_second_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
 	    $autocomplete3 = new MoodleQuickForm_select('id_third_level', 'autocomplete lvl 3', [], array('id'=>'id_third_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
 
-	    $str .= html_writer::tag('input', '', array('name'=>'field_'.$this->field->id,'disabled'=>'disabled','id' => 'field_'.$this->field->id, 'class' => 'mod-data-input custom-select','value'=>$content));
+	    $str .= html_writer::tag('input', '', array('name'=>'field_'.$this->field->id,'hidden'=>'true','id' => 'field_'.$this->field->id, 'class' => 'mod-data-input custom-select','value'=>$content));
+	    $str .= html_writer::tag('p', $content);
+	    $str .= html_writer::tag('br', '');
 		$str .= "<div>" . $autocomplete1->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete2->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete3->toHtml() . "</div>";
