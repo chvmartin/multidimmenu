@@ -24,16 +24,24 @@
  */
 
 $functions = array(
-    'datafield_menucat_get_level2' => array(
-        'classname'   => 'datafield_menucat\external',
-        'methodname'  => 'get_level2',
-        'type'        => 'read',
-        'ajax'        => true,
-    ),
-    'datafield_menucat_get_level3' => array(
-	    'classname'   => 'datafield_menucat\external',
-	    'methodname'  => 'get_level3',
-	    'type'        => 'read',
-	    'ajax'        => true,
-    )
+	'datafield_menucat_get_second_level' => array(
+		'classname' => 'datafield_menucat_external',
+		'methodname' => 'get_second_level',
+		'classpath' => '',
+		'description'   => 'Load menu items',
+		'type'          => 'write',
+		'ajax'          => true,
+		'capabilities'  => '',
+		'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+	),
+	'datafield_menucat_get_third_level' => array(
+		'classname' => 'datafield_menucat_external',
+		'methodname' => 'get_third_level',
+		'classpath' => '',
+		'description'   => 'Load menu items',
+		'type'          => 'write',
+		'ajax'          => true,
+		'capabilities'  => '',
+		'services'      => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+	)
 );

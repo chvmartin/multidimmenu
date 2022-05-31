@@ -35,7 +35,6 @@ class data_field_menucat extends data_field_base {
     function display_add_field($recordid = 0, $formdata = null) {
         global $DB, $OUTPUT,$PAGE,$CFG;
 
-		//nacita data ak je vytvoreny zaznam pre datafield z databazi
         if ($formdata) {
             $fieldname = 'field_' . $this->  field->id;
             $content = $formdata->$fieldname;
@@ -57,19 +56,22 @@ class data_field_menucat extends data_field_base {
 	    }
 	    $str .= '</label>';
 
-	    $menulevel1=[];
+
 
 	    $convert_content = new custom_menu($this->field->param1, current_language());
-
+	    $menulevel1=[];
+	    $menulevel1[].='Choose...';
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
-		    $menulevel1[].=$menulvl1->get_text();
+		    $menulevel1['firstlvl_'.$menulvl1->get_text()].=$menulvl1->get_text();
 	    }
+	    $autocomplete1 = new MoodleQuickForm_select('id_first_level', 'autocomplete lvl 1', $menulevel1, array('id'=>'id_first_level','contentid'=>$this->field->id));
+	    $autocomplete2 = new MoodleQuickForm_select('id_second_level', 'autocomplete lvl 2', [], array('id'=>'id_second_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
+	    $autocomplete3 = new MoodleQuickForm_select('id_third_level', 'autocomplete lvl 3', [], array('id'=>'id_third_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
 
-	    $autocomplete1 = new MoodleQuickForm_autocomplete('level1', 'autocomplete lvl 1', $menulevel1, array('width' => '95%','contentid'=>$this->field->id));
-	    $autocomplete2 = new MoodleQuickForm_autocomplete('level2', 'autocomplete lvl 2', [], array('width' => '95%'));
-	    $autocomplete3 = new MoodleQuickForm_autocomplete('level3', 'autocomplete lvl 3', [], array('width' => '95%'));
-
-	    $str .= "<div>" . $autocomplete1->toHtml() . "</div>";
+	    $str .= html_writer::tag('input', '', array('name'=>'field_'.$this->field->id,'hidden'=>'true','id' => 'field_'.$this->field->id, 'class' => 'mod-data-input custom-select','value'=>$content));
+	    $str .= html_writer::tag('p', $content);
+	    $str .= html_writer::tag('br', '');
+		$str .= "<div>" . $autocomplete1->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete2->toHtml() . "</div>";
 	    $str .= "<div>" . $autocomplete3->toHtml() . "</div>";
 	    $str .= '</div>';
@@ -147,7 +149,7 @@ class data_field_menucat extends data_field_base {
     }
 
     /**
-     * Return the plugin configs for external functions.
+     * Return the plugin configs for externallib functions.
      *
      * @return array the list of config parameters
      * @since Moodle 3.3
