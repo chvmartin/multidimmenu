@@ -58,7 +58,7 @@ class datafield_menucat_external extends external_api
 	    $convert_content = new \custom_menu($content, current_language());
 	    $firstlvlparam = substr($params['firstlevel'],strpos($params['firstlevel'],'_')+1,strlen($params['firstlevel']));
 		foreach ($convert_content->get_children() as $key => $menufirstlevel){
-			if($menufirstlevel->get_text() == $firstlvlparam){
+			if(prepare_menu_item($menufirstlevel->get_text()) == $firstlvlparam){
 				foreach ($menufirstlevel->get_children() as $child){
 					$childprop = new \stdClass();
 					$childprop->id = 'secondlvl_'.$child->get_text();

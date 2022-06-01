@@ -57,12 +57,12 @@ class data_field_menucat extends data_field_base {
 	    $str .= '</label>';
 
 
-
+        //echo substr('firstlvl_Non-intrusive_inspection',strpos('firstlvl_Non-intrusive_inspection','_')+1,strlen('firstlvl_Non-intrusive_inspection'));
 	    $convert_content = new custom_menu($this->field->param1, current_language());
 	    $menulevel1=[];
 	    $menulevel1[].='Choose...';
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
-		    $menulevel1['firstlvl_'.$menulvl1->get_text()].=$menulvl1->get_text();
+		    $menulevel1['firstlvl_'.self::prepare_menu_item($menulvl1->get_text())].=$menulvl1->get_text();
 	    }
 	    $autocomplete1 = new MoodleQuickForm_select('id_first_level', 'autocomplete lvl 1', $menulevel1, array('id'=>'id_first_level','contentid'=>$this->field->id));
 	    $autocomplete2 = new MoodleQuickForm_select('id_second_level', 'autocomplete lvl 2', [], array('id'=>'id_second_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
@@ -161,5 +161,18 @@ class data_field_menucat extends data_field_base {
             $configs["param$i"] = $this->field->{"param$i"};
         }
         return $configs;
+    }
+
+    /**
+     * Return prepared menuitem without whitespaces.
+     *
+     * @return string of prepared menuitem without whitespaces
+     * @since Moodle 3.3
+     */
+    public function prepare_menu_item($value) {
+
+        $menuitem = trim($value);
+        $menuitem = str_replace(' ','_',$menuitem);
+        return $menuitem;
     }
 }
