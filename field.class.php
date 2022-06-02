@@ -56,24 +56,34 @@ class data_field_menucat extends data_field_base {
 	    }
 	    $str .= '</label>';
 
-
-        //echo substr('firstlvl_Non-intrusive_inspection',strpos('firstlvl_Non-intrusive_inspection','_')+1,strlen('firstlvl_Non-intrusive_inspection'));
 	    $convert_content = new custom_menu($this->field->param1, current_language());
 	    $menulevel1=[];
-	    $menulevel1[].='Choose...';
+	    $menulevel2=[];
+	    $menulevel3=[];
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
 		    $menulevel1['firstlvl_'.self::prepare_menu_item($menulvl1->get_text())].=$menulvl1->get_text();
-	    }
-	    $autocomplete1 = new MoodleQuickForm_select('id_first_level', 'autocomplete lvl 1', $menulevel1, array('id'=>'id_first_level','contentid'=>$this->field->id));
-	    $autocomplete2 = new MoodleQuickForm_select('id_second_level', 'autocomplete lvl 2', [], array('id'=>'id_second_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
-	    $autocomplete3 = new MoodleQuickForm_select('id_third_level', 'autocomplete lvl 3', [], array('id'=>'id_third_level','contentid'=>$this->field->id,'disabled'=>'disabled'));
+		    if(json_decode($content)->firstlevel == $menulvl1->get_text()){
+				foreach ($menulvl1->get_children() as $menulvl2){
+					$menulevel2['secondlvl_'.self::prepare_menu_item($menulvl2->get_text())].=$menulvl2->get_text();
+					if(json_decode($content)->secondlevel == $menulvl2->get_text()){
+						foreach ($menulvl2->get_children() as $menulvl3){
+							$menulevel3['thirdlvl_'.self::prepare_menu_item($menulvl3->get_text())].=$menulvl3->get_text();
+						}
+					}
+				}
 
+			}
+	    }
 	    $str .= html_writer::tag('input', '', array('name'=>'field_'.$this->field->id,'hidden'=>'true','id' => 'field_'.$this->field->id, 'class' => 'mod-data-input custom-select','value'=>$content));
-	    $str .= html_writer::tag('p', $content);
-	    $str .= html_writer::tag('br', '');
-		$str .= "<div>" . $autocomplete1->toHtml() . "</div>";
-	    $str .= "<div>" . $autocomplete2->toHtml() . "</div>";
-	    $str .= "<div>" . $autocomplete3->toHtml() . "</div>";
+	    $str .= html_writer::tag('label', 'Menu level 1:', array('name'=>'Menu level 1','value'=>'Menu level 1'));
+		$str .= html_writer::select($menulevel1, 'id_first_level', 'firstlvl_'.self::prepare_menu_item(json_decode($content)->firstlevel), array('' => get_string('menuchoose', 'data')),
+		    array('id' => 'id_first_level', 'class' => 'mod-data-input custom-select','contentid'=>$this->field->id));
+	    $str .= html_writer::tag('label', 'Menu level 2:', array('name'=>'Menu level 2','value'=>'Menu level 2'));
+	    $str .= html_writer::select($menulevel2, 'id_second_level', 'secondlvl_'.self::prepare_menu_item(json_decode($content)->secondlevel), array('' => get_string('menuchoose', 'data')),
+		    array('id' => 'id_second_level', 'class' => 'mod-data-input custom-select','contentid'=>$this->field->id));
+	    $str .= html_writer::tag('label', 'Menu level 3:', array('name'=>'Menu level 3','value'=>'Menu level 3'));
+	    $str .= html_writer::select($menulevel3, 'id_third_level', 'thirdlvl_'.self::prepare_menu_item(json_decode($content)->thirdlevel), array('' => get_string('menuchoose', 'data')),
+		    array('id' => 'id_third_level', 'class' => 'mod-data-input custom-select','contentid'=>$this->field->id));
 	    $str .= '</div>';
 
         return $str;
@@ -175,4 +185,17 @@ class data_field_menucat extends data_field_base {
         $menuitem = str_replace(' ','_',$menuitem);
         return $menuitem;
     }
+
+	/**
+	 * Return prepared menuitem without whitespaces.
+	 *
+	 * @return string of prepared menuitem without whitespaces
+	 * @since Moodle 3.3
+	 */
+	public function get_menu_items($menuitems) {
+
+		$menuitem = trim($menuitems);
+		$menuitem = str_replace(' ','_',$menuitem);
+		return $menuitem;
+	}
 }

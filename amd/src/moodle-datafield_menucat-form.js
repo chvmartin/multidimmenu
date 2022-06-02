@@ -21,7 +21,7 @@ define(['jquery', 'core/ajax'],
                 if (this.value) {
                     $('#id_second_level').attr('disabled', false)
 	                input.val('');
-	                input.val($('#id_first_level').find(":selected").text());
+	                input.val('{\"firstlevel\":\"' + $('#id_first_level').find(":selected").text() + '\"}');
                 } else {
                     $('#id_second_level').attr('disabled', true)
 	                secondlevel.empty()
@@ -59,7 +59,7 @@ define(['jquery', 'core/ajax'],
 		        if (this.value) {
 			        $('#id_third_level').attr('disabled', false)
 			        input.val('');
-			        input.val($('#id_first_level').find(":selected").text()+'=>'+$('#id_second_level').find(":selected").text());
+			        input.val('{\"firstlevel\":\"' + $('#id_first_level').find(":selected").text() + '\",\"secondlevel\":\"' + $('#id_second_level').find(":selected").text()+'\"}');
 		        } else {
 			        $('#id_third_level').attr('disabled', true)
 			        thirdlevel.empty()
@@ -90,7 +90,7 @@ define(['jquery', 'core/ajax'],
 		        if (this.value) {
 			        $('#id_third_level').attr('disabled', false)
 			        input.val('');
-			        input.val($('#id_first_level').find(":selected").text()+'=>'+$('#id_second_level').find(":selected").text()+'=>'+$('#id_third_level').find(":selected").text());
+			        input.val('{\"firstlevel\":\"' + $('#id_first_level').find(":selected").text() + '\",\"secondlevel\":\"' + $('#id_second_level').find(":selected").text()+'\",\"thirdlevel\":\"'+$('#id_third_level').find(":selected").text()+'\"}');
 		        }
 	        });
         };
