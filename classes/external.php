@@ -26,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/externallib.php");
+use data_field_menucat;
 
 
 class datafield_menucat_external extends external_api
@@ -58,10 +59,10 @@ class datafield_menucat_external extends external_api
 	    $convert_content = new \custom_menu($content, current_language());
 	    $firstlvlparam = substr($params['firstlevel'],strpos($params['firstlevel'],'_')+1,strlen($params['firstlevel']));
 		foreach ($convert_content->get_children() as $key => $menufirstlevel){
-			if(prepare_menu_item($menufirstlevel->get_text()) == $firstlvlparam){
+			if(self::prepare_menu_item($menufirstlevel->get_text()) == $firstlvlparam){
 				foreach ($menufirstlevel->get_children() as $child){
 					$childprop = new \stdClass();
-					$childprop->id = 'secondlvl_'.$child->get_text();
+					$childprop->id = 'secondlvl_'.self::prepare_menu_item($child->get_text());
 					$childprop->secondlevelitem = $child->get_text();
 					$menusecondlevel[]=$childprop;
 				}
@@ -114,11 +115,11 @@ class datafield_menucat_external extends external_api
 		foreach ($convert_content->get_children() as $key => $menufirstlevel){
 			if($menufirstlevel->get_text() == trim($params['firstlevel'])){
 				foreach ($menufirstlevel->get_children() as $key2 => $childsecondlevel){
-					if($childsecondlevel->get_text() == $secondlvlparam){
+					if(self::prepare_menu_item($childsecondlevel->get_text()) == $secondlvlparam){
 						foreach ($childsecondlevel->get_children() as $child){
 
 								$childprop = new \stdClass();
-								$childprop->id = 'thirdlvl_'.$child->get_text();
+								$childprop->id = 'thirdlvl_'.self::prepare_menu_item($child->get_text());
 								$childprop->thirdlevelitem = $child->get_text();
 								$menuthirdlevel[]=$childprop;
 						}
@@ -141,6 +142,18 @@ class datafield_menucat_external extends external_api
 			])
 		);
 	}
+    /**
+     * Return prepared menuitem without whitespaces.
+     *
+     * @return string of prepared menuitem without whitespaces
+     * @since Moodle 3.3
+     */
+    public function prepare_menu_item($value) {
+
+        $menuitem = trim($value);
+        $menuitem = str_replace(' ','_',$menuitem);
+        return $menuitem;
+    }
 
 
 
