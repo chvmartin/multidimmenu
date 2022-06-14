@@ -17,7 +17,7 @@
 /**
  * The Global User Report externallib api functions.
  *
- * @package    datafield_menucat;
+ * @package    datafield_multidimmenu;
  * @category    admin
  * @copyright   2022 Lukas Celinak, Edumood,  <lukascelinak@gmail.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,10 +26,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/externallib.php");
-use data_field_menucat;
+use data_field_multidimmenu;
 
 
-class datafield_menucat_external extends external_api
+class datafield_multidimmenu_external extends external_api
 {
     public static function get_second_level_parameters() {
         $firstlevel = new \external_value(PARAM_TEXT, 'The menu level 1 parameter',);

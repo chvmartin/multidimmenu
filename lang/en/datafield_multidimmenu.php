@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'datafield_menucat', language 'en', branch 'master'
+ * Strings for component 'datafield_multidimmenu', language 'en', branch 'master'
  *
  * @package    datafield
  * @subpackage menu
@@ -24,6 +24,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Menucat';
+$string['pluginname'] = 'multidimmenu';
 $string['fieldtypelabel'] = 'Multiple Menu field';
 $string['privacy:metadata'] = 'The Menu field component does not store any personal data, it uses tables defined in mod_data.';

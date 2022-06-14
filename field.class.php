@@ -22,9 +22,9 @@
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
-class data_field_menucat extends data_field_base {
+class data_field_multidimmenu extends data_field_base {
 
-    var $type = 'menucat';
+    var $type = 'multidimmenu';
     /**
      * priority for globalsearch indexing
      *
@@ -38,14 +38,23 @@ class data_field_menucat extends data_field_base {
         if ($formdata) {
             $fieldname = 'field_' . $this->  field->id;
             $content = $formdata->$fieldname;
+	        $firstlevelid = self::prepare_menu_item(json_decode($content)->firstlevel);
+	        $secondlevelid = self::prepare_menu_item(json_decode($content)->secondlevel);
+	        $thirdlevelid = self::prepare_menu_item(json_decode($content)->thirdlevel);
         } else if ($recordid) {
-            $content = $DB->get_field('data_content', 'content', array('fieldid'=>$this->field->id, 'recordid'=>$recordid));
+            $content = $DB->get_field('data_content', 'content1', array('fieldid'=>$this->field->id, 'recordid'=>$recordid));
             $content = trim($content);
+	        $firstlevelid = self::prepare_menu_item(json_decode($content)->firstlevel);
+	        $secondlevelid = self::prepare_menu_item(json_decode($content)->secondlevel);
+	        $thirdlevelid = self::prepare_menu_item(json_decode($content)->thirdlevel);
         } else {
             $content = '';
+	        $firstlevelid = '';
+	        $secondlevelid = '';
+	        $thirdlevelid = '';
         }
 
-        $PAGE->requires->js_call_amd('datafield_menucat/moodle-datafield_menucat-form', 'init');
+        $PAGE->requires->js_call_amd('datafield_multidimmenu/loadmenu', 'init');
 
 	    $str = '<div title="' . s($this->field->description) . '">';
 	    $str .= '<label for="' . 'field_' . $this->field->id . '">';
@@ -61,28 +70,29 @@ class data_field_menucat extends data_field_base {
 	    $menulevel2=[];
 	    $menulevel3=[];
 	    foreach ($convert_content->get_children() as $key => $menulvl1) {
-		    $menulevel1['firstlvl_'.self::prepare_menu_item($menulvl1->get_text())].=$menulvl1->get_text();
-		    if(json_decode($content)->firstlevel == $menulvl1->get_text()){
-				foreach ($menulvl1->get_children() as $menulvl2){
-					$menulevel2['secondlvl_'.self::prepare_menu_item($menulvl2->get_text())].=$menulvl2->get_text();
-					if(json_decode($content)->secondlevel == $menulvl2->get_text()){
-						foreach ($menulvl2->get_children() as $menulvl3){
-							$menulevel3['thirdlvl_'.self::prepare_menu_item($menulvl3->get_text())].=$menulvl3->get_text();
-						}
-					}
+		    $menulevel1['firstlvl_'.self::prepare_menu_item($menulvl1->get_text())]=$menulvl1->get_text();
+		    if(isset($content) && !empty($content)){
+				if(json_decode($content)->firstlevel == $menulvl1->get_text()){
+				    foreach ($menulvl1->get_children() as $menulvl2){
+					    $menulevel2['secondlvl_'.self::prepare_menu_item($menulvl2->get_text())]=$menulvl2->get_text();
+					    if(json_decode($content)->secondlevel == $menulvl2->get_text()){
+						    foreach ($menulvl2->get_children() as $menulvl3){
+							    $menulevel3['thirdlvl_'.self::prepare_menu_item($menulvl3->get_text())]=$menulvl3->get_text();
+						    }
+					    }
+				    }
 				}
-
 			}
 	    }
 	    $str .= html_writer::tag('input', '', array('name'=>'field_'.$this->field->id,'hidden'=>'true','id' => 'field_'.$this->field->id, 'class' => 'mod-data-input custom-select','value'=>$content));
 	    $str .= html_writer::tag('label', 'Menu level 1:', array('name'=>'Menu level 1','value'=>'Menu level 1'));
-		$str .= html_writer::select($menulevel1, 'id_first_level', 'firstlvl_'.self::prepare_menu_item(json_decode($content)->firstlevel), array('' => get_string('menuchoose', 'data')),
+		$str .= html_writer::select($menulevel1, 'id_first_level', 'firstlvl_'.$firstlevelid, array('' => get_string('menuchoose', 'data')),
 		    array('id' => 'id_first_level', 'class' => 'mod-data-input custom-select','contentid'=>$this->field->id));
 	    $str .= html_writer::tag('label', 'Menu level 2:', array('name'=>'Menu level 2','value'=>'Menu level 2'));
-	    $str .= html_writer::select($menulevel2, 'id_second_level', 'secondlvl_'.self::prepare_menu_item(json_decode($content)->secondlevel), array('' => get_string('menuchoose', 'data')),
+	    $str .= html_writer::select($menulevel2, 'id_second_level', 'secondlvl_'.$secondlevelid, array('' => get_string('menuchoose', 'data')),
 		    array('id' => 'id_second_level', 'class' => 'mod-data-input custom-select','contentid'=>$this->field->id));
 	    $str .= html_writer::tag('label', 'Menu level 3:', array('name'=>'Menu level 3','value'=>'Menu level 3'));
-	    $str .= html_writer::select($menulevel3, 'id_third_level', 'thirdlvl_'.self::prepare_menu_item(json_decode($content)->thirdlevel), array('' => get_string('menuchoose', 'data')),
+	    $str .= html_writer::select($menulevel3, 'id_third_level', 'thirdlvl_'.$thirdlevelid, array('' => get_string('menuchoose', 'data')),
 		    array('id' => 'id_third_level', 'class' => 'mod-data-input custom-select','contentid'=>$this->field->id));
 	    $str .= '</div>';
 
@@ -122,7 +132,7 @@ class data_field_menucat extends data_field_base {
         }
 
         $return = html_writer::label(get_string('fieldtypelabel', "datafield_" . $this->type),
-            'menucatf_' . $this->field->id, false, array('class' => 'accesshide'));
+            'multidimmenuf_' . $this->field->id, false, array('class' => 'accesshide'));
         $return .= html_writer::select($options, 'f_'.$this->field->id, $content, array('' => get_string('menuchoose', 'data')),
                 array('class' => 'custom-select'));
         return $return;
@@ -141,7 +151,7 @@ class data_field_menucat extends data_field_base {
 
         static $i=0;
         $i++;
-        $name = "df_menucat_$i";
+        $name = "df_multidimmenu_$i";
         $varcharcontent = $DB->sql_compare_text("{$tablealias}.content", 255);
 
         return array(" ({$tablealias}.fieldid = {$this->field->id} AND $varcharcontent = :$name) ", array($name=>$value));
@@ -180,22 +190,44 @@ class data_field_menucat extends data_field_base {
      * @since Moodle 3.3
      */
     public function prepare_menu_item($value) {
+		if($value){
 
+		}
         $menuitem = trim($value);
         $menuitem = str_replace(' ','_',$menuitem);
         return $menuitem;
     }
 
 	/**
-	 * Return prepared menuitem without whitespaces.
-	 *
-	 * @return string of prepared menuitem without whitespaces
-	 * @since Moodle 3.3
+	 * Update the content of one data field in the data_content table
+	 * @global object
+	 * @param int $recordid
+	 * @param mixed $value
+	 * @param string $name
+	 * @return bool
 	 */
-	public function get_menu_items($menuitems) {
+	function update_content($recordid, $value, $name=''){
+		global $DB;
 
-		$menuitem = trim($menuitems);
-		$menuitem = str_replace(' ','_',$menuitem);
-		return $menuitem;
+		$content = new stdClass();
+		$content->fieldid = $this->field->id;
+		$content->recordid = $recordid;
+		if($value !== ''){
+			$contentvalue='';
+			$menuarray=json_decode($value,true);
+			$menuarray=implode('=>',$menuarray);
+			$content->content = clean_param($menuarray, PARAM_NOTAGS);
+		}else{
+			$content->content = clean_param($value, PARAM_NOTAGS);
+		}
+
+		$content->content1 = clean_param($value, PARAM_NOTAGS);
+
+		if ($oldcontent = $DB->get_record('data_content', array('fieldid'=>$this->field->id, 'recordid'=>$recordid))) {
+			$content->id = $oldcontent->id;
+			return $DB->update_record('data_content', $content);
+		} else {
+			return $DB->insert_record('data_content', $content);
+		}
 	}
 }
