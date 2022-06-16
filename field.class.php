@@ -118,22 +118,9 @@ class data_field_multidimmenu extends data_field_base {
             }
         }
 
-        $options = array();
-        foreach (explode("\n",$this->field->param1) as $option) {
-            $option = trim($option);
-            if (!isset($usedoptions[$option])) {
-                continue;
-            }
-            $options[$option] = $option;
-        }
-        if (!$options) {
-            // oh, nothing to search for
-            return '';
-        }
-
         $return = html_writer::label(get_string('fieldtypelabel', "datafield_" . $this->type),
             'multidimmenuf_' . $this->field->id, false, array('class' => 'accesshide'));
-        $return .= html_writer::select($options, 'f_'.$this->field->id, $content, array('' => get_string('menuchoose', 'data')),
+        $return .= html_writer::select($usedoptions, 'f_'.$this->field->id, $content, array('' => get_string('menuchoose', 'data')),
                 array('class' => 'custom-select'));
         return $return;
     }
